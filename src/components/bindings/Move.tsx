@@ -1,11 +1,11 @@
-import {usePlugin} from "@remnote/plugin-sdk";
-import {KeyCommand} from "../../lib/types";
-import {isYDC} from "../modes/predicates";
-import {ModeProps, VimMode} from "../modes/types";
-import {useRepeatBindings} from "./Repeat";
+import { usePlugin } from '@remnote/plugin-sdk';
+import { KeyCommand } from '../../lib/types';
+import { isYDC } from '../modes/predicates';
+import { ModeProps, VimMode } from '../modes/types';
+import { useRepeatBindings } from './Repeat';
 
 interface MoveBindingsProps extends ModeProps {
-  moveFinalizer?: () => Promise<void>
+  moveFinalizer?: () => Promise<void>;
 }
 
 export function useMoveBindings(props: MoveBindingsProps) {
@@ -18,7 +18,7 @@ export function useMoveBindings(props: MoveBindingsProps) {
     return {
       keyboardShortcut: key,
       action: async () => {
-        let ignoredEvents = false
+        let ignoredEvents = false;
         if (isYDC(props.currentMode)) {
           props.ignoreSelectionEvents.current = true;
           ignoredEvents = true;
@@ -28,116 +28,116 @@ export function useMoveBindings(props: MoveBindingsProps) {
         for (let i = 0; i < repeat; i++) {
           await action();
         }
-        const finalizer = props.moveFinalizer
-        if (typeof finalizer === "function") {
+        const finalizer = props.moveFinalizer;
+        if (typeof finalizer === 'function') {
           await finalizer();
         }
         if (ignoredEvents) {
           props.ignoreSelectionEvents.current = false;
-          props.setMode(VimMode.Normal)
+          props.setMode(VimMode.Normal);
         }
         props.repeatN.current = 0;
-      }
-    }
-  }
+      },
+    };
+  };
 
   const bindings: Record<string, KeyCommand> = {
     ...repeatBindings,
-    'h': {
+    h: {
       id: 'move left',
-      name: "Move Left",
+      name: 'Move Left',
       ...makeMoveCommand('h', async () => {
-        await plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 2)
+        await plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 2);
       }),
     },
-    'backspace': {
+    backspace: {
       id: 'move left 2',
-      name: "Move Left",
+      name: 'Move Left',
       ...makeMoveCommand('backspace', () => plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 2)),
     },
-    'j': {
+    j: {
       id: 'move down',
-      name: "Move Down",
-      ...makeMoveCommand('j', () => plugin.editor.moveFocusedRemSelectionVertical(1))
+      name: 'Move Down',
+      ...makeMoveCommand('j', () => plugin.editor.moveFocusedRemSelectionVertical(1)),
     },
-    'enter': {
+    enter: {
       id: 'move down 2',
-      name: "Move Down",
+      name: 'Move Down',
       ...makeMoveCommand('enter', async () => {
         // TODO: visual mode
-        await plugin.editor.moveCaret(-1, -1, 6)
-        await plugin.editor.moveFocusedRemSelectionVertical(1)
-      })
+        await plugin.editor.moveCaret(-1, -1, 6);
+        await plugin.editor.moveFocusedRemSelectionVertical(1);
+      }),
     },
-    'k': {
-      id: "move up",
-      name: "Move Up",
+    k: {
+      id: 'move up',
+      name: 'Move Up',
       ...makeMoveCommand('k', async () => {
         // TODO: visual mode
-        plugin.editor.moveFocusedRemSelectionVertical(-1)
-      })
+        plugin.editor.moveFocusedRemSelectionVertical(-1);
+      }),
     },
-    'l': {
+    l: {
       id: 'move right',
-      name: "Move Right",
-      ...makeMoveCommand('l', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 2))
+      name: 'Move Right',
+      ...makeMoveCommand('l', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 2)),
     },
-    'space': {
+    space: {
       id: 'move right 2',
-      name: "Move Right",
-      ...makeMoveCommand('space', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 2))
+      name: 'Move Right',
+      ...makeMoveCommand('space', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 2)),
     },
-    'w': {
+    w: {
       id: 'word',
-      name: "Word",
-      ...makeMoveCommand('w', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 4))
+      name: 'Word',
+      ...makeMoveCommand('w', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 4)),
     },
     // just does the same as w
     'shift+w': {
       id: 'move big word forwards',
-      name: "Move Big Word Forward",
-      ...makeMoveCommand('shift+w', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 4))
+      name: 'Move Big Word Forward',
+      ...makeMoveCommand('shift+w', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 4)),
     },
-    'b': {
+    b: {
       id: 'backwards',
-      name: "Backward Word",
-      ...makeMoveCommand('b', () => plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 4))
+      name: 'Backward Word',
+      ...makeMoveCommand('b', () => plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 4)),
     },
     // just does the same as b
     'shift+b': {
       id: 'move big word backwards',
-      name: "Move Big Word Backward",
-      ...makeMoveCommand('shift+b', () => plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 4))
+      name: 'Move Big Word Backward',
+      ...makeMoveCommand('shift+b', () => plugin.editor.moveCaret(-1, isVisualOrYCD ? 0 : -1, 4)),
     },
-    'e': {
+    e: {
       id: 'end',
-      name: "End of word",
+      name: 'End of word',
       ...makeMoveCommand('e', async () => {
         // needs to move to the actual end of the word in visual or YCD mode
-        await plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, isVisualOrYCD ? 5 : 7)
-      })
+        await plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, isVisualOrYCD ? 5 : 7);
+      }),
     },
     // just does the same as e
     'shift+e': {
       id: 'big end of word',
-      name: "End of word",
-      ...makeMoveCommand('shift+e', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 7))
+      name: 'End of word',
+      ...makeMoveCommand('shift+e', () => plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 7)),
     },
 
     '0': {
       id: 'Beginning of line',
-      name: "Beginning of line",
-      ...makeMoveCommand('0', async() => {
+      name: 'Beginning of line',
+      ...makeMoveCommand('0', async () => {
         plugin.editor.moveCaret(isVisualOrYCD ? 0 : -1, -1, 6);
-      })
+      }),
     },
 
     'shift+4': {
       id: 'End of line',
-      name: "End of line",
+      name: 'End of line',
       ...makeMoveCommand('shift+4', async () => {
-        plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 6)
-      })
+        plugin.editor.moveCaret(isVisualOrYCD ? 0 : 1, 1, 6);
+      }),
     },
 
     // 'shift+g': {
@@ -147,6 +147,6 @@ export function useMoveBindings(props: MoveBindingsProps) {
     //     plugin.editor.moveCaret(1, 6)
     //   })
     // },
-  }
+  };
   return bindings;
 }

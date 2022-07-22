@@ -1,13 +1,13 @@
-import { AppEvents, useAPIEventListener, usePlugin, } from "@remnote/plugin-sdk";
-import {useModalEditorBindings} from "../../lib/bindings";
-import {ModeProps, VimMode} from "./types";
-import {KeyCommand} from "../../lib/types";
+import { AppEvents, useAPIEventListener, usePlugin } from '@remnote/plugin-sdk';
+import { useModalEditorBindings } from '../../lib/bindings';
+import { ModeProps, VimMode } from './types';
+import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
-import {useMoveBindings} from "../bindings/Move";
-import {MutableRefObject} from "react";
+import { useMoveBindings } from '../bindings/Move';
+import { MutableRefObject } from 'react';
 
 interface VisualModeProps extends ModeProps {
-  ignoreSelectionEvents: MutableRefObject<boolean>
+  ignoreSelectionEvents: MutableRefObject<boolean>;
 }
 
 export const VisualMode = (props: VisualModeProps) => {
@@ -17,64 +17,59 @@ export const VisualMode = (props: VisualModeProps) => {
 
   const bindings: Record<string, KeyCommand> = {
     ...moveBindings,
-    'escape': {
-      id: "escape",
-      name: "escape",
-      ...makeCommand('escape', async() => {
-        await plugin.editor.collapseSelection("start");
+    escape: {
+      id: 'escape',
+      name: 'escape',
+      ...makeCommand('escape', async () => {
+        await plugin.editor.collapseSelection('start');
         props.setMode(VimMode.Normal);
-      })
+      }),
     },
-    'd': {
-      id: "delete visual",
-      name: "delete vis",
-      ...makeCommand('d', async() => {
+    d: {
+      id: 'delete visual',
+      name: 'delete vis',
+      ...makeCommand('d', async () => {
         await plugin.editor.cutSelection();
         props.setMode(VimMode.Normal);
-      })
+      }),
     },
-    'x': {
-      id: "delete visual",
-      name: "delete vis",
-      ...makeCommand('x', async() => {
+    x: {
+      id: 'delete visual',
+      name: 'delete vis',
+      ...makeCommand('x', async () => {
         await plugin.editor.cutSelection();
         props.setMode(VimMode.Normal);
-      })
+      }),
     },
-    'c': {
-      id: "delete visual",
-      name: "delete vis",
-      ...makeCommand('c', async() => {
+    c: {
+      id: 'delete visual',
+      name: 'delete vis',
+      ...makeCommand('c', async () => {
         await plugin.editor.cutSelection();
         props.setMode(VimMode.Insert);
-      })
-    }
-  }
+      }),
+    },
+  };
 
-  useModalEditorBindings(VimMode.Visual, props.currentMode, props.previousMode, bindings)
+  useModalEditorBindings(VimMode.Visual, props.currentMode, props.previousMode, bindings);
 
   const updateVisualMode = (selText: any) => {
     if (props.ignoreSelectionEvents.current || !selText) {
       return;
     }
-    const {start, end} = selText;
+    const { start, end } = selText;
     if (start.offset !== end.offset) {
       if (props.currentMode !== VimMode.Visual) {
-        props.setMode(VimMode.Visual) 
+        props.setMode(VimMode.Visual);
       }
-    }
-    else {
+    } else {
       if (props.currentMode === VimMode.Visual) {
-        props.setMode(VimMode.Normal)
+        props.setMode(VimMode.Normal);
       }
     }
-  }
+  };
 
-  useAPIEventListener(
-    AppEvents.EditorSelectionChanged,
-    undefined,
-    updateVisualMode,
-  )
+  useAPIEventListener(AppEvents.EditorSelectionChanged, undefined, updateVisualMode);
 
-  return null
-}
+  return null;
+};
