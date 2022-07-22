@@ -1,15 +1,15 @@
 {
   "manifestVersion": 1,
-  "id": "plugin_template",
-  "name": "Plugin Template",
+  "id": "vim_mode",
+  "name": "Vim Mode",
   "author": "remnote",
-  "repoUrl": "",
+  "repoUrl": "https://github.com/bjsi/vim-mode",
   "version": {
     "major": 0,
     "minor": 0,
     "patch": 1
   },
-  "description": "",
+  "description": "Vim mode for RemNote",
   "requestNative": false,
   "requiredScopes": [
     {
