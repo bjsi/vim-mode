@@ -5,6 +5,7 @@ import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
 import { useMoveBindings } from '../bindings/Move';
 import { MutableRefObject } from 'react';
+import { cutSelection } from '../../lib/editor';
 
 interface NormalModeProps extends ModeProps {
   ignoreSelectionEvents: MutableRefObject<boolean>;
@@ -49,7 +50,7 @@ export const NormalMode = (props: NormalModeProps) => {
       ...makeCommand('x', async () => {
         props.ignoreSelectionEvents.current = true;
         await plugin.editor.moveCaret(0, 1, 2);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.ignoreSelectionEvents.current = false;
       }),
     },
@@ -59,7 +60,7 @@ export const NormalMode = (props: NormalModeProps) => {
       ...makeCommand('x', async () => {
         props.ignoreSelectionEvents.current = true;
         await plugin.editor.moveCaret(0, 1, 2);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.ignoreSelectionEvents.current = false;
         props.setMode(VimMode.Insert);
       }),
@@ -70,7 +71,7 @@ export const NormalMode = (props: NormalModeProps) => {
       ...makeCommand('shift+x', async () => {
         props.ignoreSelectionEvents.current = true;
         await plugin.editor.moveCaret(-1, 0, 2);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.ignoreSelectionEvents.current = false;
       }),
     },
@@ -91,7 +92,7 @@ export const NormalMode = (props: NormalModeProps) => {
       ...makeCommand('shift+d', async () => {
         props.ignoreSelectionEvents.current = true;
         await plugin.editor.moveCaret(0, 1, 6);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         await plugin.editor.collapseSelection('start');
         props.ignoreSelectionEvents.current = false;
       }),
@@ -102,7 +103,7 @@ export const NormalMode = (props: NormalModeProps) => {
       ...makeCommand('shift+c', async () => {
         props.ignoreSelectionEvents.current = true;
         await plugin.editor.moveCaret(0, 1, 6);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         await plugin.editor.collapseSelection('start');
         props.ignoreSelectionEvents.current = false;
         props.setMode(VimMode.Insert);

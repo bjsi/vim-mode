@@ -12,7 +12,7 @@ export const DeleteMode = (props: DeleteModeProps) => {
   const moveBindings = useMoveBindings({
     ...props,
     moveFinalizer: async () => {
-      await plugin.editor.cutSelection();
+      await cutSelection(plugin);
     },
   });
   const makeCommand = useMakeCommand();
@@ -23,7 +23,7 @@ export const DeleteMode = (props: DeleteModeProps) => {
       name: 'Delete',
       ...makeCommand('d', async () => {
         await plugin.editor.moveCaret(-1, 1, 6);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
       }),
     },
     i: {

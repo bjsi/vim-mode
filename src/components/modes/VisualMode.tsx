@@ -5,6 +5,7 @@ import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
 import { useMoveBindings } from '../bindings/Move';
 import { MutableRefObject } from 'react';
+import { cutSelection } from '../../lib/editor';
 
 interface VisualModeProps extends ModeProps {
   ignoreSelectionEvents: MutableRefObject<boolean>;
@@ -29,7 +30,7 @@ export const VisualMode = (props: VisualModeProps) => {
       id: 'delete visual',
       name: 'delete vis',
       ...makeCommand('d', async () => {
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.setMode(VimMode.Normal);
       }),
     },
@@ -37,7 +38,7 @@ export const VisualMode = (props: VisualModeProps) => {
       id: 'delete visual',
       name: 'delete vis',
       ...makeCommand('x', async () => {
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.setMode(VimMode.Normal);
       }),
     },
@@ -45,7 +46,7 @@ export const VisualMode = (props: VisualModeProps) => {
       id: 'delete visual',
       name: 'delete vis',
       ...makeCommand('c', async () => {
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.setMode(VimMode.Insert);
       }),
     },

@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "vim_mode",
   "name": "Vim Mode",
-  "author": "remnote",
+  "author": "Jamesb",
   "repoUrl": "https://github.com/bjsi/vim-mode",
   "version": {
     "major": 0,

@@ -4,6 +4,7 @@ import { ModeProps, VimMode } from './types';
 import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
 import { useMoveBindings } from '../bindings/Move';
+import { cutSelection } from '../../lib/editor';
 
 interface ChangeModeProps extends ModeProps {}
 
@@ -18,7 +19,7 @@ export const ChangeMode = (props: ChangeModeProps) => {
       name: 'Change',
       ...makeCommand('c', async () => {
         await plugin.editor.moveCaret(-1, 1, 6);
-        await plugin.editor.cutSelection();
+        await cutSelection(plugin);
         props.setMode(VimMode.Insert);
       }),
     },
