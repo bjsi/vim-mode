@@ -1,27 +1,58 @@
-import { renderWidget } from '@remnote/plugin-sdk';
+import { renderWidget, SelectionType, useTracker } from '@remnote/plugin-sdk';
 import { useRef, useState } from 'react';
 import { ChangeMode } from '../components/modes/ChangeMode';
 import { DeleteMode } from '../components/modes/DeleteMode';
 import { InsertMode } from '../components/modes/InsertMode';
 import { NormalMode } from '../components/modes/NormalMode';
-import { VimMode } from '../components/modes/types';
+import { ModeProps, VimMode } from '../components/modes/types';
 import { VisualLineMode } from '../components/modes/VisualLineMode';
 import { VisualMode } from '../components/modes/VisualMode';
 import { YankMode } from '../components/modes/YankMode';
 import { usePrevious } from '../lib/hooks';
+import React from 'react';
 
 export const Vim = () => {
   const [mode, setMode] = useState<keyof VimMode>(VimMode.Normal);
   const previousMode = usePrevious(mode);
   const repeatN = useRef<number>(0);
   const ignoreSelectionEvents = useRef<boolean>(false);
-  const commonProps = {
+  const selection = useTracker((rp) => rp.editor.getSelection());
+  // const focusedText = useTracker((rp) => rp.editor.getFocusedEditorText());
+  const focusedRem = useTracker((rp) => rp.focus.getFocusedRem());
+
+  const commonProps: ModeProps = {
     repeatN,
     currentMode: mode,
     previousMode: previousMode,
     setMode: setMode,
     ignoreSelectionEvents: ignoreSelectionEvents,
+    selection,
+    focusedText: [],
+    focusedRem,
   };
+
+  React.useEffect(() => {
+    if (ignoreSelectionEvents.current) {
+      return;
+    }
+    if (!selection) {
+      return;
+    }
+    if (selection.type === SelectionType.Rem) {
+      setMode(VimMode.VisualLine);
+    } else {
+      const { start, end } = selection.range;
+      if (start !== end) {
+        if (mode !== VimMode.VisualText) {
+          setMode(VimMode.VisualText);
+        }
+      } else {
+        if (mode === VimMode.VisualText) {
+          setMode(VimMode.Normal);
+        }
+      }
+    }
+  }, [selection]);
 
   return (
     <div>
@@ -42,7 +73,7 @@ export const Vim = () => {
       </button>
       <button
         onClick={() => {
-          setMode(VimMode.Visual);
+          setMode(VimMode.VisualText);
         }}
       >
         Visual

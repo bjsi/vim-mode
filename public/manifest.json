@@ -4,6 +4,7 @@
   "name": "Vim Mode",
   "author": "Jamesb",
   "repoUrl": "https://github.com/bjsi/vim-mode",
+  "enableOnMobile": false,
   "version": {
     "major": 0,
     "minor": 0,

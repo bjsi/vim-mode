@@ -1,3 +1,4 @@
+import { Rem, RemSelection, RichTextInterface, TextSelection } from '@remnote/plugin-sdk';
 import { MutableRefObject } from 'react';
 import { StateUpdater } from '../../lib/types';
 
@@ -7,6 +8,9 @@ export interface ModeProps {
   repeatN: MutableRefObject<number>;
   previousMode: keyof VimMode | undefined;
   setMode: StateUpdater<keyof VimMode>;
+  selection: RemSelection | TextSelection | undefined;
+  focusedText: RichTextInterface | undefined;
+  focusedRem: Rem | undefined;
 }
 
 export enum YankChangeDelete {
@@ -18,7 +22,7 @@ export enum YankChangeDelete {
 export enum Modes {
   Normal = 'Normal',
   Insert = 'Insert',
-  Visual = 'Visual',
+  VisualText = 'VisualText',
   VisualLine = 'VisualLine',
 }
 

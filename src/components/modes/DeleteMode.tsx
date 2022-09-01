@@ -12,7 +12,7 @@ export const DeleteMode = (props: DeleteModeProps) => {
   const moveBindings = useMoveBindings({
     ...props,
     moveFinalizer: async () => {
-      await cutSelection(plugin);
+      await plugin.editor.cut();
     },
   });
   const makeCommand = useMakeCommand();
@@ -22,8 +22,10 @@ export const DeleteMode = (props: DeleteModeProps) => {
       id: 'delete',
       name: 'Delete',
       ...makeCommand('d', async () => {
-        await plugin.editor.moveCaret(-1, 1, 6);
-        await cutSelection(plugin);
+        if (props.focusedRem) {
+          await plugin.editor.selectRem([props.focusedRem._id]);
+          await plugin.editor.cut();
+        }
       }),
     },
     i: {
@@ -33,6 +35,12 @@ export const DeleteMode = (props: DeleteModeProps) => {
     },
   };
 
-  useModalEditorBindings(VimMode.Delete, props.currentMode, props.previousMode, deleteBindings);
+  useModalEditorBindings(
+    VimMode.Delete,
+    props.currentMode,
+    props.previousMode,
+    deleteBindings,
+    props.repeatN.current
+  );
   return null;
 };

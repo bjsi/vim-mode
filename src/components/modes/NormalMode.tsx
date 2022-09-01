@@ -1,11 +1,10 @@
-import { usePlugin } from '@remnote/plugin-sdk';
+import { MoveUnit, TextSelection, usePlugin } from '@remnote/plugin-sdk';
 import { useModalEditorBindings } from '../../lib/bindings';
 import { ModeProps, VimMode } from './types';
 import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
 import { useMoveBindings } from '../bindings/Move';
 import { MutableRefObject } from 'react';
-import { cutSelection } from '../../lib/editor';
 
 interface NormalModeProps extends ModeProps {
   ignoreSelectionEvents: MutableRefObject<boolean>;
@@ -49,8 +48,9 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'delete single char',
       ...makeCommand('x', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(0, 1, 2);
-        await cutSelection(plugin);
+        const { start, end } = (props.selection as TextSelection).range;
+        await plugin.editor.selectText({ start, end: end + 1 });
+        await plugin.editor.cut();
         props.ignoreSelectionEvents.current = false;
       }),
     },
@@ -59,10 +59,11 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'delete single char',
       ...makeCommand('x', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(0, 1, 2);
-        await cutSelection(plugin);
-        props.ignoreSelectionEvents.current = false;
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start, end: start + 1 });
+        await plugin.editor.cut();
         props.setMode(VimMode.Insert);
+        props.ignoreSelectionEvents.current = false;
       }),
     },
     'shift+x': {
@@ -70,8 +71,9 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'delete single char backwards',
       ...makeCommand('shift+x', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(-1, 0, 2);
-        await cutSelection(plugin);
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start: start - 1, end: start });
+        await plugin.editor.cut();
         props.ignoreSelectionEvents.current = false;
       }),
     },
@@ -80,8 +82,9 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'Copy to end of line',
       ...makeCommand('shift+y', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(0, 1, 6);
-        await plugin.editor.copySelection();
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start, end: Number.MAX_SAFE_INTEGER });
+        await plugin.editor.copy();
         await plugin.editor.collapseSelection('start');
         props.ignoreSelectionEvents.current = false;
       }),
@@ -91,8 +94,9 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'Delete to end of line',
       ...makeCommand('shift+d', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(0, 1, 6);
-        await cutSelection(plugin);
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start, end: Number.MAX_SAFE_INTEGER });
+        await plugin.editor.cut();
         await plugin.editor.collapseSelection('start');
         props.ignoreSelectionEvents.current = false;
       }),
@@ -102,8 +106,9 @@ export const NormalMode = (props: NormalModeProps) => {
       name: 'Change to end of line',
       ...makeCommand('shift+c', async () => {
         props.ignoreSelectionEvents.current = true;
-        await plugin.editor.moveCaret(0, 1, 6);
-        await cutSelection(plugin);
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start, end: Number.MAX_SAFE_INTEGER });
+        await plugin.editor.cut();
         await plugin.editor.collapseSelection('start');
         props.ignoreSelectionEvents.current = false;
         props.setMode(VimMode.Insert);
@@ -117,21 +122,24 @@ export const NormalMode = (props: NormalModeProps) => {
       id: 'enter visual',
       name: 'enter visual',
       ...makeCommand('v', async () => {
-        props.setMode(VimMode.Visual);
+        props.setMode(VimMode.VisualText);
       }),
     },
     'mod+v': {
       id: 'enter visual char',
       name: 'enter visual char',
       ...makeCommand('mod+v', async () => {
-        await plugin.editor.moveCaret(0, 1, 2);
+        const start = (props.selection as TextSelection).range.start;
+        await plugin.editor.selectText({ start, end: start + 1 });
       }),
     },
     'shift+v': {
       id: 'enter visual line',
       name: 'enter visual line',
       ...makeCommand('mod+v', async () => {
-        plugin.editor.expandLineSelectionRelative(1), props.setMode(VimMode.VisualLine);
+        if (props.focusedRem) {
+          plugin.editor.selectRem([props.focusedRem._id]);
+        }
       }),
     },
 
@@ -149,7 +157,7 @@ export const NormalMode = (props: NormalModeProps) => {
       id: 'big insert',
       name: 'Big Insert',
       ...makeCommand('shift+i', async () => {
-        plugin.editor.moveCaret(-1, -1, 6);
+        plugin.editor.moveCaret(-1, MoveUnit.LINE);
         props.setMode(VimMode.Insert);
       }),
     },
@@ -157,7 +165,7 @@ export const NormalMode = (props: NormalModeProps) => {
       id: 'enter insert after',
       name: 'Enter Insert After',
       ...makeCommand('a', async () => {
-        plugin.editor.moveCaret(1, 1, 2);
+        plugin.editor.moveCaret(1, MoveUnit.CHARACTER);
         props.setMode(VimMode.Insert);
       }),
     },
@@ -165,18 +173,19 @@ export const NormalMode = (props: NormalModeProps) => {
       id: 'enter insert at end',
       name: 'Enter Insert at End',
       ...makeCommand('shift+a', async () => {
-        plugin.editor.moveCaret(1, 1, 6);
+        plugin.editor.moveCaret(1, MoveUnit.LINE);
         props.setMode(VimMode.Insert);
       }),
     },
-    o: {
-      id: 'Insert new Rem after',
-      name: 'Insert new Rem after',
-      ...makeCommand('o', async () => {
-        await plugin.editor.insertRemAfterFocusedRem(false);
-        props.setMode(VimMode.Insert);
-      }),
-    },
+    // TODO
+    // o: {
+    //   id: 'Insert new Rem after',
+    //   name: 'Insert new Rem after',
+    //   ...makeCommand('o', async () => {
+    //     await plugin.editor.insertRemAfterFocusedRem(false);
+    //     props.setMode(VimMode.Insert);
+    //   }),
+    // },
     // TODO
     // 'shift+o': {
     //   id: "Insert new Rem before",
@@ -204,13 +213,13 @@ export const NormalMode = (props: NormalModeProps) => {
         plugin.editor.redo();
       }),
     },
-    'shift+j': {
-      id: 'join lines',
-      name: 'Join Lines',
-      ...makeCommand('shift+j', async () => {
-        await plugin.editor.tryMergeWithRelative(1);
-      }),
-    },
+    // 'shift+j': {
+    //   id: 'join lines',
+    //   name: 'Join Lines',
+    //   ...makeCommand('shift+j', async () => {
+    //     await plugin.editor.tryMergeWithRelative(1);
+    //   }),
+    // },
     '~': {
       id: 'Capitalize',
       name: 'Capitalize',
@@ -225,16 +234,14 @@ export const NormalMode = (props: NormalModeProps) => {
         // TODO:
       }),
     },
-    '/': {
-      id: 'search',
-      name: 'Search',
-      ...makeCommand('/', async () => {
-        await plugin.editor.openCtrlF();
-        props.setMode(VimMode.Insert);
-      }),
-    },
   };
-  useModalEditorBindings(VimMode.Normal, props.currentMode, props.previousMode, bindings);
+  useModalEditorBindings(
+    VimMode.Normal,
+    props.currentMode,
+    props.previousMode,
+    bindings,
+    props.repeatN.current
+  );
 
   return null;
 };

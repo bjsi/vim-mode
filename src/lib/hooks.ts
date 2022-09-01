@@ -1,5 +1,6 @@
 import { usePlugin } from '@remnote/plugin-sdk';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { VimCommand } from './types';
 
 export function usePrevious<T>(value: T) {
   const ref = React.useRef<T>();
@@ -11,12 +12,13 @@ export function usePrevious<T>(value: T) {
 
 export const useMakeCommand = () => {
   const plugin = usePlugin();
-  const makeCommand = (shortcut: string, action: () => Promise<void>) => {
+  const makeCommand = (
+    keyboardShortcut: string,
+    action: (repeatN: number) => Promise<void> | void
+  ): VimCommand => {
     return {
-      keyboardShortcut: shortcut,
-      action: async () => {
-        await action();
-      },
+      keyboardShortcut,
+      action,
     };
   };
   return makeCommand;

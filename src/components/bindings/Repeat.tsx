@@ -1,7 +1,5 @@
-import { usePlugin } from '@remnote/plugin-sdk';
 import { KeyCommand } from '../../lib/types';
-import { isYDC } from '../modes/predicates';
-import { ModeProps, VimMode } from '../modes/types';
+import { ModeProps } from '../modes/types';
 import * as Re from 'remeda';
 
 interface RepeatBindingsProps extends ModeProps {

@@ -73,6 +73,7 @@ const allKeys = [
   'space',
   'backspace',
   'escape',
+  'enter',
 ].reduce((acc, key) => {
   return acc.concat([key, key.toUpperCase(), `mod+${key}`, `shift+${key}`]);
 }, [] as string[]);
@@ -81,27 +82,28 @@ export const useModalEditorBindings = (
   mode: keyof VimMode,
   currentMode: keyof VimMode,
   previousMode: keyof VimMode | undefined,
-  bindingMap: Record<string, KeyCommand>
+  bindingMap: Record<string, KeyCommand>,
+  repeat: number
 ) => {
   const plugin = usePlugin();
   const currentBindings = Object.values(bindingMap) as KeyCommand[];
-  useAPIEventListener(AppEvents.StealKeyEvent, 'plugin_template', (args) => {
+  useAPIEventListener(AppEvents.StealKeyEvent, 'vim_mode', (args) => {
     if (currentMode === mode) {
       const action = bindingMap[args.key.toLowerCase()]?.action;
       if (action && typeof action === 'function') {
-        action();
+        action(repeat);
       }
     }
   });
 
   useRunAsync(async () => {
     if (mode === VimMode.Insert && currentMode === VimMode.Insert) {
-      await plugin.editor.releaseKeys(allKeys);
-      await plugin.editor.stealKeys(
+      await plugin.app.releaseKeys(allKeys);
+      await plugin.app.stealKeys(
         currentBindings.reduce((acc, x) => acc.concat(x.keyboardShortcut), [] as string[])
       );
     } else if (currentMode !== VimMode.Insert) {
-      await plugin.editor.stealKeys(allKeys);
+      await plugin.app.stealKeys(allKeys);
     }
   }, [mode, currentMode]);
 };

@@ -1,10 +1,9 @@
-import { usePlugin } from '@remnote/plugin-sdk';
+import { TextSelection, usePlugin } from '@remnote/plugin-sdk';
 import { useModalEditorBindings } from '../../lib/bindings';
 import { ModeProps, VimMode } from './types';
 import { KeyCommand } from '../../lib/types';
 import { useMakeCommand } from '../../lib/hooks';
 import { useMoveBindings } from '../bindings/Move';
-import { copySelection } from '../../lib/editor';
 
 interface YankCopyDeleteModesProps extends ModeProps {}
 
@@ -18,10 +17,10 @@ export const YankMode = (props: YankCopyDeleteModesProps) => {
       id: 'yank line',
       name: 'yank line',
       ...makeCommand('y', async () => {
-        const sel = await plugin.editor.getSelection();
-        await plugin.editor.moveCaret(-1, 1, 6);
-        await copySelection(plugin);
-        await plugin.editor.setSelection(sel.anchor, sel.focus);
+        const sel = (props.selection as TextSelection).range;
+        await plugin.editor.selectText({ start: 0, end: Number.MAX_SAFE_INTEGER });
+        await plugin.editor.copy();
+        await plugin.editor.selectText(sel);
       }),
     },
     i: {
@@ -31,6 +30,12 @@ export const YankMode = (props: YankCopyDeleteModesProps) => {
     },
   };
 
-  useModalEditorBindings(VimMode.Yank, props.currentMode, props.previousMode, yankBindings);
+  useModalEditorBindings(
+    VimMode.Yank,
+    props.currentMode,
+    props.previousMode,
+    yankBindings,
+    props.repeatN.current
+  );
   return null;
 };

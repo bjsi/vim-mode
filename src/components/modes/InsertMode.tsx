@@ -1,4 +1,4 @@
-import { usePlugin } from '@remnote/plugin-sdk';
+import { MoveUnit, usePlugin } from '@remnote/plugin-sdk';
 import { useModalEditorBindings } from '../../lib/bindings';
 import { KeyCommand } from '../../lib/types';
 import { ModeProps, VimMode } from './types';
@@ -13,11 +13,17 @@ export const InsertMode = (props: InsertModeProps) => {
       name: 'Escape',
       keyboardShortcut: 'escape',
       action: () => {
-        plugin.editor.moveCaret(-1, -1, 2);
+        plugin.editor.moveCaret(-1, MoveUnit.CHARACTER);
         props.setMode(VimMode.Normal);
       },
     },
   };
-  useModalEditorBindings(VimMode.Insert, props.currentMode, props.previousMode, bindings);
+  useModalEditorBindings(
+    VimMode.Insert,
+    props.currentMode,
+    props.previousMode,
+    bindings,
+    props.repeatN.current
+  );
   return null;
 };
