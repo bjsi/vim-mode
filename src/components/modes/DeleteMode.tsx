@@ -33,6 +33,13 @@ export const DeleteMode = (props: DeleteModeProps) => {
       name: 'Delete inner',
       ...makeCommand('i', async () => {}),
     },
+    escape: {
+      id: 'esc',
+      name: 'Escape',
+      ...makeCommand('escape', async () => {
+        props.setMode("Normal")
+      }),
+    }
   };
 
   useModalEditorBindings(

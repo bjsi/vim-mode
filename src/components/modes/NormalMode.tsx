@@ -22,6 +22,13 @@ export const NormalMode = (props: NormalModeProps) => {
     /*
      * Yank, copy, delete, paste
      */
+
+    p: {
+      id: 'paste',
+      name: 'paste',
+      ...makeCommand('p', async () => {
+      })
+    },
     y: {
       id: 'yank',
       name: 'yank',

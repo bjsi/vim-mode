@@ -38,11 +38,13 @@ export const movePoint = (
     // TODO: moving backwards not working
     else if (unit === 'WORD_END_VIM') {
       const prevChar = text[i + -1 * direction];
-      const nextNextCharacter = text[i + 2 * direction];
-      const nextNextIsWordCharacter = nextNextCharacter?.match(wordCharRegex);
       const prevIsWordCharacter = prevChar?.match(wordCharRegex);
+      const nextCharacter = text[i + 1 * direction];
+      const nextNextCharacter = text[i + 2 * direction];
+      const nextIsWordCharacter = nextCharacter?.match(wordCharRegex);
+      const nextNextIsWordCharacter = nextNextCharacter?.match(wordCharRegex);
       return direction == 1
-        ? !!(!nextNextIsWordCharacter && seenWordCharacters)
+        ? !!((!nextNextIsWordCharacter || (!nextIsWordCharacter && !prevIsWordCharacter) ) && seenWordCharacters)
         : !!(prevIsWordCharacter && hasSeenWhitespace);
     } else if (unit === MoveUnit.LINE) {
       return false;

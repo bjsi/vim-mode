@@ -10,7 +10,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@remnote/plugin-sdk": "^0.0.5",
+    "@remnote/plugin-sdk": "^0.0.30",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "remeda": "^0.0.35"
