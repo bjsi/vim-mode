@@ -44,7 +44,10 @@ export const movePoint = (
       const nextIsWordCharacter = nextCharacter?.match(wordCharRegex);
       const nextNextIsWordCharacter = nextNextCharacter?.match(wordCharRegex);
       return direction == 1
-        ? !!((!nextNextIsWordCharacter || (!nextIsWordCharacter && !prevIsWordCharacter) ) && seenWordCharacters)
+        ? !!(
+            (!nextNextIsWordCharacter || (!nextIsWordCharacter && !prevIsWordCharacter)) &&
+            seenWordCharacters
+          )
         : !!(prevIsWordCharacter && hasSeenWhitespace);
     } else if (unit === MoveUnit.LINE) {
       return false;

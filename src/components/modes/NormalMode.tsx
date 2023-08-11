@@ -26,8 +26,7 @@ export const NormalMode = (props: NormalModeProps) => {
     p: {
       id: 'paste',
       name: 'paste',
-      ...makeCommand('p', async () => {
-      })
+      ...makeCommand('p', async () => {}),
     },
     y: {
       id: 'yank',

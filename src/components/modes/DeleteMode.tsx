@@ -37,9 +37,9 @@ export const DeleteMode = (props: DeleteModeProps) => {
       id: 'esc',
       name: 'Escape',
       ...makeCommand('escape', async () => {
-        props.setMode("Normal")
+        props.setMode('Normal');
       }),
-    }
+    },
   };
 
   useModalEditorBindings(
